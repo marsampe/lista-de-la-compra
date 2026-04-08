@@ -449,7 +449,7 @@
             </div>
             <input type="password" id="apiKeyInput" class="api-key-input" placeholder="sk-ant-...">
             <div class="api-key-buttons">
-                <button class="btn-save-key" onclick="saveApiKey()">Guardar API Key</button>
+                <button type="button" class="btn-save-key" id="saveBtn">Guardar API Key</button>
             </div>
             <div class="api-key-info">
                 <strong>ℹ️ Nota:</strong> Tu API Key se guarda solo en tu navegador. No se envía a ningún servidor. Es totalmente seguro.
@@ -774,8 +774,30 @@ Reglas importantes:
             results.style.display = 'none';
             empty.style.display = 'none';
         }
+
+        // Inicializar
+        if (!apiKey) {
+            apiKeyModal.classList.remove('hidden');
+        } else {
+            apiKeyBanner.style.display = 'flex';
+        }
+
+        // Botón cambiar API Key
+        window.changeApiKey = function() {
+            apiKeyInput.value = '';
+            apiKeyModal.classList.remove('hidden');
+        };
     </script>
 </body>
 </html>
+```
+
+Ahora actualiza el archivo en GitHub:
+
+1. Ve a tu repositorio
+2. Haz clic en `index.html`
+3. Haz clic en el icono de editar (lápiz)
+4. **Borra todo el código antiguo** y pega este nuevo
+5. Haz clic en "Commit changes"
 
 ¿Lo hiciste?
