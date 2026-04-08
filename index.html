@@ -43,6 +43,104 @@
             color: #7f8c8d;
             font-size: 14px;
         }
+
+        .api-key-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .api-key-modal.hidden {
+            display: none;
+        }
+
+        .api-key-box {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .api-key-box h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .api-key-box p {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .api-key-box a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .api-key-box a:hover {
+            text-decoration: underline;
+        }
+
+        .api-key-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+
+        .api-key-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .api-key-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-save-key {
+            flex: 1;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .btn-save-key:hover {
+            background: #2980b9;
+        }
+
+        .btn-save-key:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .api-key-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
         
         .upload-area {
             border: 2px dashed #bdc3c7;
@@ -208,6 +306,16 @@
         .btn-print:hover {
             background: #2980b9;
         }
+
+        .btn-change-key {
+            background: #95a5a6;
+            color: white;
+            border-color: #95a5a6;
+        }
+
+        .btn-change-key:hover {
+            background: #7f8c8d;
+        }
         
         table {
             width: 100%;
@@ -261,6 +369,24 @@
             width: 80px;
             color: #7f8c8d;
         }
+
+        .api-key-info-banner {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .api-key-info-banner button {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
         
         @media (max-width: 600px) {
             .results-header {
@@ -285,6 +411,11 @@
             .quantity, .unit {
                 width: auto;
             }
+
+            .api-key-box {
+                margin: 20px;
+                padding: 20px;
+            }
         }
         
         @media print {
@@ -292,7 +423,7 @@
                 background: white;
             }
             
-            .upload-area, .button-group {
+            .upload-area, .button-group, .api-key-info-banner {
                 display: none;
             }
             
@@ -304,10 +435,37 @@
     </style>
 </head>
 <body>
+    <div id="apiKeyModal" class="api-key-modal">
+        <div class="api-key-box">
+            <h2>Configura tu API Key</h2>
+            <p>Para usar esta app necesitas una API Key gratuita de Claude.</p>
+            <p><strong>¿Cómo obtenerla?</strong></p>
+            <div style="margin-left: 20px; color: #7f8c8d; font-size: 14px;">
+                <div style="margin-bottom: 8px;">1. Ve a <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
+                <div style="margin-bottom: 8px;">2. Crea una cuenta o inicia sesión</div>
+                <div style="margin-bottom: 8px;">3. Ve a API Keys</div>
+                <div style="margin-bottom: 8px;">4. Copia tu API Key</div>
+                <div>5. Pégala aquí</div>
+            </div>
+            <input type="password" id="apiKeyInput" class="api-key-input" placeholder="sk-ant-...">
+            <div class="api-key-buttons">
+                <button class="btn-save-key" onclick="saveApiKey()">Guardar API Key</button>
+            </div>
+            <div class="api-key-info">
+                <strong>ℹ️ Nota:</strong> Tu API Key se guarda solo en tu navegador. No se envía a ningún servidor. Es totalmente seguro.
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>📋 Generador de Lista de Compra</h1>
             <p>Sube un PDF con tu menú semanal y obtén automáticamente la lista de compra consolidada</p>
+        </div>
+
+        <div id="apiKeyBanner" class="api-key-info-banner" style="display: none;">
+            <span>✓ API Key configurada</span>
+            <button class="btn-change-key" onclick="changeApiKey()">Cambiar API Key</button>
         </div>
 
         <div class="upload-area" id="uploadArea">
@@ -361,6 +519,11 @@
 
     <script>
         let shoppingList = [];
+        let apiKey = localStorage.getItem('anthropicApiKey');
+
+        const apiKeyModal = document.getElementById('apiKeyModal');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const apiKeyBanner = document.getElementById('apiKeyBanner');
         const uploadArea = document.getElementById('uploadArea');
         const pdfInput = document.getElementById('pdfInput');
         const fileInfo = document.getElementById('fileInfo');
@@ -371,6 +534,41 @@
         const empty = document.getElementById('empty');
         const tableBody = document.getElementById('tableBody');
         const count = document.getElementById('count');
+
+        function showApiKeyModal() {
+            apiKeyModal.classList.remove('hidden');
+        }
+
+        function hideApiKeyModal() {
+            apiKeyModal.classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const key = apiKeyInput.value.trim();
+            if (!key) {
+                alert('Por favor, pega tu API Key');
+                return;
+            }
+            localStorage.setItem('anthropicApiKey', key);
+            apiKey = key;
+            hideApiKeyModal();
+            apiKeyBanner.style.display = 'flex';
+        }
+
+        function changeApiKey() {
+            apiKeyInput.value = '';
+            showApiKeyModal();
+        }
+
+        if (!apiKey) {
+            showApiKeyModal();
+        } else {
+            apiKeyBanner.style.display = 'flex';
+        }
+
+        apiKeyInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') saveApiKey();
+        });
 
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -405,6 +603,11 @@
                 return;
             }
 
+            if (!apiKey) {
+                showError('Por favor, configura tu API Key primero');
+                return;
+            }
+
             fileName.textContent = file.name;
             fileInfo.style.display = 'block';
             loading.style.display = 'block';
@@ -426,6 +629,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'x-api-key': apiKey
                     },
                     body: JSON.stringify({
                         model: 'claude-sonnet-4-20250514',
