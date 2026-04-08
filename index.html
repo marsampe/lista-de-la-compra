@@ -549,10 +549,15 @@
                 alert('Por favor, pega tu API Key');
                 return;
             }
-            localStorage.setItem('anthropicApiKey', key);
-            apiKey = key;
-            hideApiKeyModal();
-            apiKeyBanner.style.display = 'flex';
+            try {
+                localStorage.setItem('anthropicApiKey', key);
+                apiKey = key;
+                apiKeyModal.classList.add('hidden');
+                apiKeyBanner.style.display = 'flex';
+                console.log('API Key guardada correctamente');
+            } catch (e) {
+                alert('Error al guardar: ' + e.message);
+            }
         }
 
         function changeApiKey() {
@@ -772,3 +777,14 @@ Reglas importantes:
     </script>
 </body>
 </html>
+```
+
+Ahora actualiza el archivo en GitHub:
+
+1. Ve a tu repositorio
+2. Haz clic en `index.html`
+3. Haz clic en el icono de editar (lápiz)
+4. **Borra todo el código antiguo** y pega este nuevo
+5. Haz clic en "Commit changes"
+
+¿Lo hiciste?
