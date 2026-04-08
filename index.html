@@ -533,9 +533,12 @@
         const tableBody = document.getElementById('tableBody');
         const count = document.getElementById('count');
 
-        // Event listener para el botón de guardar API Key
+        function showApiMessage(msg, type) {
+            const msgDiv = document.getElementById('apiMessage');
+            msgDiv.innerHTML = '<div class="message ' + type + '">' + msg + '</div>';
+        }
+
         apiSaveBtn.addEventListener('click', function() {
-            console.log('Botón clickeado');
             const key = apiKeyInput.value.trim();
             
             if (!key) {
@@ -543,30 +546,20 @@
                 return;
             }
 
-            if (!key.startsWith('sk-ant-')) {
-                showApiMessage('La API Key debe comenzar con "sk-ant-"', 'error');
-                return;
-            }
-
             localStorage.setItem('anthropicApiKey', key);
             apiKey = key;
-            showApiMessage('¡API Key guardada correctamente!', 'success');
+            showApiMessage('API Key guardada correctamente', 'success');
             
             setTimeout(function() {
                 apiModal.classList.add('hidden');
             }, 1500);
         });
 
-        // Enter para guardar
         apiKeyInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 apiSaveBtn.click();
             }
         });
-
-        function showApiMessage(msg, type) {
-            apiMessage.innerHTML = `<div class="message ${type}">${msg}</div>`;
-        }
 
         // Inicializar modal
         if (!apiKey) {
@@ -575,19 +568,18 @@
             apiModal.classList.add('hidden');
         }
 
-        // Upload area
-        uploadArea.addEventListener('dragover', (e) => {
+        uploadArea.addEventListener('dragover', function(e) {
             e.preventDefault();
             uploadArea.style.borderColor = '#3498db';
             uploadArea.style.background = '#ecf0f1';
         });
 
-        uploadArea.addEventListener('dragleave', () => {
+        uploadArea.addEventListener('dragleave', function() {
             uploadArea.style.borderColor = '#bdc3c7';
             uploadArea.style.background = '#fff';
         });
 
-        uploadArea.addEventListener('drop', (e) => {
+        uploadArea.addEventListener('drop', function(e) {
             e.preventDefault();
             uploadArea.style.borderColor = '#bdc3c7';
             uploadArea.style.background = '#fff';
@@ -596,7 +588,7 @@
             }
         });
 
-        pdfInput.addEventListener('change', (e) => {
+        pdfInput.addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
                 handleFile(e.target.files[0]);
             }
@@ -630,7 +622,7 @@
 
         async function processPDF(base64) {
             try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                var response = await fetch('https://api.anthropic.com/v1/messages', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -653,48 +645,35 @@
                                     },
                                     {
                                         type: 'text',
-                                        text: `Extrae TODOS los ingredientes del menú semanal. Para cada ingrediente, estima una cantidad razonable para una semana si no está especificada.
-
-Responde SOLO con JSON válido (sin markdown, sin backticks, sin explicaciones):
-{
-  "ingredientes": [
-    {"nombre": "ingrediente1", "cantidad": 500, "unidad": "g"},
-    {"nombre": "ingrediente2", "cantidad": 2, "unidad": "l"}
-  ]
-}
-
-Reglas importantes:
-- Escapa correctamente las comillas internas con \\
-- No incluyas comillas simples dentro de los valores
-- Suma cantidades si un ingrediente aparece varios días
-- Sé específico con unidades (g, kg, ml, l, unidades, etc.)
-- Redondea a números simples`
-                    }
-                ]
+                                        text: 'Extrae TODOS los ingredientes del menu semanal. Para cada ingrediente, estima una cantidad razonable para una semana si no esta especificada. Responde SOLO con JSON valido (sin markdown, sin backticks, sin explicaciones): {"ingredientes": [{"nombre": "ingrediente1", "cantidad": 500, "unidad": "g"}]} Reglas: Escapa comillas con barra invertida. No incluyas comillas simples. Suma cantidades si un ingrediente aparece varios dias. Se especifico con unidades (g, kg, ml, l, etc). Redondea a numeros simples'
+                                    }
+                                ]
+                            }
+                        ]
                     })
                 });
 
-                const data = await response.json();
+                var data = await response.json();
                 
                 if (!data.content || !data.content[0]) {
                     throw new Error('No se pudo procesar el PDF');
                 }
 
-                let textContent = data.content[0].text;
+                var textContent = data.content[0].text;
                 textContent = textContent.replace(/```json|```/g, '').trim();
                 textContent = textContent.replace(/[\x00-\x1F]/g, ' ');
                 
-                const parsedData = JSON.parse(textContent);
+                var parsedData = JSON.parse(textContent);
 
                 if (!parsedData.ingredientes || !Array.isArray(parsedData.ingredientes)) {
-                    throw new Error('Formato de respuesta inválido');
+                    throw new Error('Formato de respuesta invalido');
                 }
 
-                const combined = {};
-                parsedData.ingredientes.forEach(ing => {
+                var combined = {};
+                parsedData.ingredientes.forEach(function(ing) {
                     if (!ing.nombre) return;
                     
-                    const key = ing.nombre.toLowerCase().trim();
+                    var key = ing.nombre.toLowerCase().trim();
                     if (!combined[key]) {
                         combined[key] = {
                             nombre: ing.nombre,
@@ -708,13 +687,13 @@ Reglas importantes:
                     }
                 });
 
-                shoppingList = Object.values(combined).sort((a, b) => 
-                    a.nombre.localeCompare(b.nombre)
-                );
+                shoppingList = Object.values(combined).sort(function(a, b) {
+                    return a.nombre.localeCompare(b.nombre);
+                });
                 
                 displayResults();
             } catch (err) {
-                showError(`Error: ${err.message}`);
+                showError('Error: ' + err.message);
             }
         }
 
@@ -727,15 +706,15 @@ Reglas importantes:
                 return;
             }
 
-            tableBody.innerHTML = shoppingList.map((item, idx) => `
-                <tr>
-                    <td>${item.nombre}</td>
-                    <td class="quantity">${item.cantidad > 0 ? (item.cantidad % 1 === 0 ? item.cantidad : item.cantidad.toFixed(1)) : '-'}</td>
-                    <td class="unit">${item.unidad || '-'}</td>
-                </tr>
-            `).join('');
+            var html = '';
+            for (var i = 0; i < shoppingList.length; i++) {
+                var item = shoppingList[i];
+                var qty = item.cantidad > 0 ? (item.cantidad % 1 === 0 ? item.cantidad : item.cantidad.toFixed(1)) : '-';
+                html += '<tr><td>' + item.nombre + '</td><td class="quantity">' + qty + '</td><td class="unit">' + (item.unidad || '-') + '</td></tr>';
+            }
+            tableBody.innerHTML = html;
 
-            count.textContent = `(${shoppingList.length} productos)`;
+            count.textContent = '(' + shoppingList.length + ' productos)';
             results.style.display = 'block';
             empty.style.display = 'none';
         }
