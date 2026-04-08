@@ -44,102 +44,134 @@
             font-size: 14px;
         }
 
-        .api-key-modal {
+        .api-modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
 
-        .api-key-modal.hidden {
-            display: none;
+        .api-modal.hidden {
+            display: none !important;
         }
 
-        .api-key-box {
+        .api-box {
             background: white;
             border-radius: 8px;
-            padding: 30px;
+            padding: 40px;
             max-width: 500px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
-        .api-key-box h2 {
-            font-size: 22px;
-            margin-bottom: 15px;
+        .api-box h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
             color: #2c3e50;
         }
 
-        .api-key-box p {
+        .api-box p {
             color: #7f8c8d;
             margin-bottom: 15px;
             font-size: 14px;
             line-height: 1.6;
         }
 
-        .api-key-box a {
-            color: #3498db;
-            text-decoration: none;
+        .api-steps {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #555;
         }
 
-        .api-key-box a:hover {
+        .api-steps div {
+            margin-bottom: 8px;
+        }
+
+        .api-box a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .api-box a:hover {
             text-decoration: underline;
         }
 
-        .api-key-input {
+        .api-input-group {
+            margin-bottom: 20px;
+        }
+
+        .api-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .api-input-group input {
             width: 100%;
             padding: 12px;
             border: 1px solid #bdc3c7;
             border-radius: 6px;
             font-size: 14px;
-            margin-bottom: 20px;
             font-family: monospace;
         }
 
-        .api-key-input:focus {
+        .api-input-group input:focus {
             outline: none;
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
-        .api-key-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-save-key {
-            flex: 1;
+        .api-button {
+            width: 100%;
             padding: 12px;
             background: #3498db;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 14px;
+            transition: background 0.2s;
         }
 
-        .btn-save-key:hover {
+        .api-button:hover {
             background: #2980b9;
         }
 
-        .btn-save-key:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
+        .api-button:active {
+            transform: scale(0.98);
         }
 
-        .api-key-info {
-            background: #ecf0f1;
-            padding: 15px;
+        .message {
+            padding: 12px;
             border-radius: 6px;
-            margin-top: 15px;
-            font-size: 12px;
-            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
         
         .upload-area {
@@ -306,16 +338,6 @@
         .btn-print:hover {
             background: #2980b9;
         }
-
-        .btn-change-key {
-            background: #95a5a6;
-            color: white;
-            border-color: #95a5a6;
-        }
-
-        .btn-change-key:hover {
-            background: #7f8c8d;
-        }
         
         table {
             width: 100%;
@@ -369,24 +391,6 @@
             width: 80px;
             color: #7f8c8d;
         }
-
-        .api-key-info-banner {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .api-key-info-banner button {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
         
         @media (max-width: 600px) {
             .results-header {
@@ -411,11 +415,6 @@
             .quantity, .unit {
                 width: auto;
             }
-
-            .api-key-box {
-                margin: 20px;
-                padding: 20px;
-            }
         }
         
         @media print {
@@ -423,7 +422,7 @@
                 background: white;
             }
             
-            .upload-area, .button-group, .api-key-info-banner {
+            .upload-area, .button-group {
                 display: none;
             }
             
@@ -435,25 +434,27 @@
     </style>
 </head>
 <body>
-    <div id="apiKeyModal" class="api-key-modal">
-        <div class="api-key-box">
-            <h2>Configura tu API Key</h2>
-            <p>Para usar esta app necesitas una API Key gratuita de Claude.</p>
-            <p><strong>¿Cómo obtenerla?</strong></p>
-            <div style="margin-left: 20px; color: #7f8c8d; font-size: 14px;">
-                <div style="margin-bottom: 8px;">1. Ve a <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
-                <div style="margin-bottom: 8px;">2. Crea una cuenta o inicia sesión</div>
-                <div style="margin-bottom: 8px;">3. Ve a API Keys</div>
-                <div style="margin-bottom: 8px;">4. Copia tu API Key</div>
-                <div>5. Pégala aquí</div>
+    <div id="apiModal" class="api-modal">
+        <div class="api-box">
+            <h2>🔑 Configura tu API Key</h2>
+            <p>Necesitas una API Key gratuita de Claude para usar esta app.</p>
+            
+            <div class="api-steps">
+                <div>1. Ve a <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
+                <div>2. Crea una cuenta o inicia sesión</div>
+                <div>3. Haz clic en "API Keys"</div>
+                <div>4. Copia tu API Key</div>
+                <div>5. Pégala abajo</div>
             </div>
-            <input type="password" id="apiKeyInput" class="api-key-input" placeholder="sk-ant-...">
-            <div class="api-key-buttons">
-                <button type="button" class="btn-save-key" id="saveBtn">Guardar API Key</button>
+
+            <div id="apiMessage"></div>
+
+            <div class="api-input-group">
+                <label>Tu API Key:</label>
+                <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
             </div>
-            <div class="api-key-info">
-                <strong>ℹ️ Nota:</strong> Tu API Key se guarda solo en tu navegador. No se envía a ningún servidor. Es totalmente seguro.
-            </div>
+
+            <button class="api-button" id="apiSaveBtn">Guardar API Key</button>
         </div>
     </div>
 
@@ -461,11 +462,6 @@
         <div class="header">
             <h1>📋 Generador de Lista de Compra</h1>
             <p>Sube un PDF con tu menú semanal y obtén automáticamente la lista de compra consolidada</p>
-        </div>
-
-        <div id="apiKeyBanner" class="api-key-info-banner" style="display: none;">
-            <span>✓ API Key configurada</span>
-            <button class="btn-change-key" onclick="changeApiKey()">Cambiar API Key</button>
         </div>
 
         <div class="upload-area" id="uploadArea">
@@ -519,11 +515,13 @@
 
     <script>
         let shoppingList = [];
-        let apiKey = localStorage.getItem('anthropicApiKey');
+        let apiKey = localStorage.getItem('anthropicApiKey') || '';
 
-        const apiKeyModal = document.getElementById('apiKeyModal');
+        const apiModal = document.getElementById('apiModal');
         const apiKeyInput = document.getElementById('apiKeyInput');
-        const apiKeyBanner = document.getElementById('apiKeyBanner');
+        const apiSaveBtn = document.getElementById('apiSaveBtn');
+        const apiMessage = document.getElementById('apiMessage');
+
         const uploadArea = document.getElementById('uploadArea');
         const pdfInput = document.getElementById('pdfInput');
         const fileInfo = document.getElementById('fileInfo');
@@ -535,46 +533,49 @@
         const tableBody = document.getElementById('tableBody');
         const count = document.getElementById('count');
 
-        function showApiKeyModal() {
-            apiKeyModal.classList.remove('hidden');
-        }
-
-        function hideApiKeyModal() {
-            apiKeyModal.classList.add('hidden');
-        }
-
-        function saveApiKey() {
+        // Event listener para el botón de guardar API Key
+        apiSaveBtn.addEventListener('click', function() {
+            console.log('Botón clickeado');
             const key = apiKeyInput.value.trim();
+            
             if (!key) {
-                alert('Por favor, pega tu API Key');
+                showApiMessage('Por favor, pega tu API Key', 'error');
                 return;
             }
-            try {
-                localStorage.setItem('anthropicApiKey', key);
-                apiKey = key;
-                apiKeyModal.classList.add('hidden');
-                apiKeyBanner.style.display = 'flex';
-                console.log('API Key guardada correctamente');
-            } catch (e) {
-                alert('Error al guardar: ' + e.message);
+
+            if (!key.startsWith('sk-ant-')) {
+                showApiMessage('La API Key debe comenzar con "sk-ant-"', 'error');
+                return;
             }
-        }
 
-        function changeApiKey() {
-            apiKeyInput.value = '';
-            showApiKeyModal();
-        }
-
-        if (!apiKey) {
-            showApiKeyModal();
-        } else {
-            apiKeyBanner.style.display = 'flex';
-        }
-
-        apiKeyInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') saveApiKey();
+            localStorage.setItem('anthropicApiKey', key);
+            apiKey = key;
+            showApiMessage('¡API Key guardada correctamente!', 'success');
+            
+            setTimeout(function() {
+                apiModal.classList.add('hidden');
+            }, 1500);
         });
 
+        // Enter para guardar
+        apiKeyInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                apiSaveBtn.click();
+            }
+        });
+
+        function showApiMessage(msg, type) {
+            apiMessage.innerHTML = `<div class="message ${type}">${msg}</div>`;
+        }
+
+        // Inicializar modal
+        if (!apiKey) {
+            apiModal.classList.remove('hidden');
+        } else {
+            apiModal.classList.add('hidden');
+        }
+
+        // Upload area
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.style.borderColor = '#3498db';
@@ -590,9 +591,8 @@
             e.preventDefault();
             uploadArea.style.borderColor = '#bdc3c7';
             uploadArea.style.background = '#fff';
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
             }
         });
 
@@ -774,30 +774,6 @@ Reglas importantes:
             results.style.display = 'none';
             empty.style.display = 'none';
         }
-
-        // Inicializar
-        if (!apiKey) {
-            apiKeyModal.classList.remove('hidden');
-        } else {
-            apiKeyBanner.style.display = 'flex';
-        }
-
-        // Botón cambiar API Key
-        window.changeApiKey = function() {
-            apiKeyInput.value = '';
-            apiKeyModal.classList.remove('hidden');
-        };
     </script>
 </body>
 </html>
-```
-
-Ahora actualiza el archivo en GitHub:
-
-1. Ve a tu repositorio
-2. Haz clic en `index.html`
-3. Haz clic en el icono de editar (lápiz)
-4. **Borra todo el código antiguo** y pega este nuevo
-5. Haz clic en "Commit changes"
-
-¿Lo hiciste?
