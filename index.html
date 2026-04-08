@@ -622,34 +622,13 @@
 
         async function processPDF(base64) {
             try {
-                var response = await fetch('https://api.anthropic.com/v1/messages', {
+                var response = await fetch('https://HeavenlyLightsalmonGenre.replit.dev/api/process-pdf', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': apiKey
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 4000,
-                        messages: [
-                            {
-                                role: 'user',
-                                content: [
-                                    {
-                                        type: 'document',
-                                        source: {
-                                            type: 'base64',
-                                            media_type: 'application/pdf',
-                                            data: base64
-                                        }
-                                    },
-                                    {
-                                        type: 'text',
-                                        text: 'Extrae TODOS los ingredientes del menu semanal. Para cada ingrediente, estima una cantidad razonable para una semana si no esta especificada. Responde SOLO con JSON valido (sin markdown, sin backticks, sin explicaciones): {"ingredientes": [{"nombre": "ingrediente1", "cantidad": 500, "unidad": "g"}]} Reglas: Escapa comillas con barra invertida. No incluyas comillas simples. Suma cantidades si un ingrediente aparece varios dias. Se especifico con unidades (g, kg, ml, l, etc). Redondea a numeros simples'
-                                    }
-                                ]
-                            }
-                        ]
+                        base64: base64
                     })
                 });
 
