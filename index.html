@@ -67,7 +67,7 @@
 
         textarea {
             width: 100%;
-            height: 400px;
+            height: 350px;
             padding: 12px;
             border: 1px solid #bdc3c7;
             border-radius: 6px;
@@ -80,6 +80,44 @@
             outline: none;
             border-color: #3498db;
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
+        .days-selector {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .days-selector h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox-wrapper label {
+            cursor: pointer;
+            font-size: 13px;
+            user-select: none;
         }
 
         .btn-process {
@@ -290,6 +328,41 @@
             <div class="section">
                 <h2>1. Pega el menú</h2>
                 <textarea id="menuText" placeholder="Pega aquí el texto del menú semanal..."></textarea>
+                
+                <div class="days-selector">
+                    <h3>📅 Selecciona los días</h3>
+                    <div class="days-grid">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="lunes" name="day" value="LUNES" checked>
+                            <label for="lunes">Lunes</label>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="martes" name="day" value="MARTES" checked>
+                            <label for="martes">Martes</label>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="miercoles" name="day" value="MIÉRCOLES" checked>
+                            <label for="miercoles">Miércoles</label>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="jueves" name="day" value="JUEVES" checked>
+                            <label for="jueves">Jueves</label>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="viernes" name="day" value="VIERNES" checked>
+                            <label for="viernes">Viernes</label>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="sabado" name="day" value="SÁBADO" checked>
+                            <label for="sabado">Sábado</label>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="domingo" name="day" value="DOMINGO" checked>
+                            <label for="domingo">Domingo</label>
+                        </div>
+                    </div>
+                </div>
+
                 <button class="btn-process" onclick="processMenu()">Generar Lista de Compra</button>
             </div>
 
@@ -299,14 +372,17 @@
                     <p style="margin-bottom: 10px;"><strong>1. Copia el texto del menú</strong></p>
                     <p style="margin-bottom: 15px; color: #7f8c8d;">Abre tu menú PDF y selecciona todo el texto (Ctrl+A), luego cópialo (Ctrl+C).</p>
                     
-                    <p style="margin-bottom: 10px;"><strong>2. Pega en el cuadro</strong></p>
-                    <p style="margin-bottom: 15px; color: #7f8c8d;">Pega el texto en el área de texto de la izquierda.</p>
+                    <p style="margin-bottom: 10px;"><strong>2. Selecciona los días</strong></p>
+                    <p style="margin-bottom: 15px; color: #7f8c8d;">Marca los días de la semana de los que quieres extraer ingredientes.</p>
+
+                    <p style="margin-bottom: 10px;"><strong>3. Pega en el cuadro</strong></p>
+                    <p style="margin-bottom: 15px; color: #7f8c8d;">Pega el texto del menú en el área de texto.</p>
                     
-                    <p style="margin-bottom: 10px;"><strong>3. Genera la lista</strong></p>
+                    <p style="margin-bottom: 10px;"><strong>4. Genera la lista</strong></p>
                     <p style="margin-bottom: 15px; color: #7f8c8d;">Haz clic en "Generar Lista de Compra" y automáticamente se extraerán todos los ingredientes.</p>
 
                     <p style="margin-bottom: 10px;"><strong>✨ Limpieza automática</strong></p>
-                    <p style="color: #7f8c8d;">Los nombres de productos se normalizan automáticamente (espacios, mayúsculas, correcciones).</p>
+                    <p style="color: #7f8c8d;">Los nombres de productos se normalizan automáticamente.</p>
                 </div>
             </div>
         </div>
@@ -338,25 +414,59 @@
     </div>
 
     <script>
-        var shoppingList = [];
-        var normalizedMap = {}; // Para rastrear cambios
+        function parseQuantity(qtyStr) {
+            // Convierte fracciones como "1/4", "1/2", "3" a números decimales
+            if (!qtyStr) return 0;
+            
+            qtyStr = qtyStr.trim();
+            
+            // Si es una fracción (contiene /)
+            if (qtyStr.includes('/')) {
+                var parts = qtyStr.split('/');
+                if (parts.length === 2) {
+                    var numerator = parseFloat(parts[0]);
+                    var denominator = parseFloat(parts[1]);
+                    if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+                        return numerator / denominator;
+                    }
+                }
+            }
+            
+            // Si es un número normal
+            return parseFloat(qtyStr) || 0;
+        }
 
-        // Función para normalizar nombres de productos
+        function formatQuantity(num) {
+            // Convierte decimales de vuelta a fracciones si es posible
+            if (num === 0) return '0';
+            
+            // Redondear a 4 decimales para evitar errores de punto flotante
+            num = Math.round(num * 10000) / 10000;
+            
+            // Convertir a fracción si es un valor común
+            if (num === 0.25) return '1/4';
+            if (num === 0.5) return '1/2';
+            if (num === 0.75) return '3/4';
+            if (num === 0.33333333) return '1/3';
+            if (num === 0.66666667) return '2/3';
+            
+            // Si es un número entero, devolverlo como tal
+            if (Number.isInteger(num)) {
+                return num.toString();
+            }
+            
+            // Si tiene decimales, redondear a 2 decimales
+            return num.toFixed(2);
+        }
+
         function normalizarNombre(nombre) {
             if (!nombre) return '';
 
             let normalizado = nombre.trim();
-            
-            // Eliminar espacios múltiples
             normalizado = normalizado.replace(/\s+/g, ' ');
-            
-            // Convertir a mayúsculas (para consistencia visual)
             normalizado = normalizado.toUpperCase();
-            
-            // Eliminar caracteres especiales pero mantener tildes y caracteres especiales españoles
             normalizado = normalizado.replace(/[^\w\sáéíóúñÁÉÍÓÚÑ\-\.]/g, '');
             
-            // Correcciones de errores comunes y variantes
             const correcciones = {
                 'PAPAS': 'PAPA',
                 'PATATAS': 'PAPA',
@@ -438,11 +548,10 @@
                 'LIMÓN': 'LIMÓN',
                 'LIMONES': 'LIMÓN',
                 'ACEITUNAS': 'ACEITUNA',
-                'MAIZ': 'TORTITAS DE MAIZ',
+                'MAIZ': 'TORTITAS DE MAÍZ',
                 'MAÍZ': 'TORTITAS DE MAÍZ'
             };
 
-            // Aplicar correcciones
             Object.keys(correcciones).forEach(key => {
                 if (normalizado.includes(key.toUpperCase())) {
                     normalizado = normalizado.replace(new RegExp(key.toUpperCase(), 'g'), correcciones[key]);
@@ -450,6 +559,15 @@
             });
 
             return normalizado.trim();
+        }
+
+        function getSelectedDays() {
+            var checkboxes = document.querySelectorAll('input[name="day"]:checked');
+            var selectedDays = [];
+            checkboxes.forEach(checkbox => {
+                selectedDays.push(checkbox.value);
+            });
+            return selectedDays;
         }
 
         function processMenu() {
@@ -460,9 +578,15 @@
                 return;
             }
 
+            var selectedDays = getSelectedDays();
+            if (selectedDays.length === 0) {
+                showError('Por favor, selecciona al menos un día de la semana');
+                return;
+            }
+
             shoppingList = [];
             normalizedMap = {};
-            parseMenu(menuText);
+            parseMenu(menuText, selectedDays);
 
             if (shoppingList.length === 0) {
                 showError('No se encontraron ingredientes. Verifica que el formato sea correcto.');
@@ -473,94 +597,112 @@
             displayResults();
         }
 
-        function parseMenu(text) {
+        function parseMenu(text, selectedDays) {
             var ingredientsMap = {};
 
             text = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
-            var recipePattern = /-([A-Z][^:]+?):\s*([^-]+?)(?=-[A-Z]|$)/g;
-            var match;
+            // Primero, dividir por días (formato: 08. MIÉRCOLES- ... 09. JUEVES- ...)
+            var dayPattern = /(\d+)\.\s+([A-Z]+)\s*-([^]*?)(?=\d+\.\s+[A-Z]+\s*-|$)/g;
+            var dayMatch;
 
-            while ((match = recipePattern.exec(text)) !== null) {
-                var recipeName = match[1].trim();
-                var ingredientText = match[2].trim();
+            while ((dayMatch = dayPattern.exec(text)) !== null) {
+                var dayNum = dayMatch[1];
+                var dayName = dayMatch[2].trim();
+                var dayContent = dayMatch[3].trim();
 
-                if (recipeName.match(/OBJETIVO|RETO|FECHA|CLIENTE|SEMANA|MIÉRCOLES|JUEVES|DOMINGO|LUNES|VIERNES|SÁBADO|MARTES/i)) {
+                // Verificar si el día está seleccionado
+                var isDaySelected = false;
+                for (var d = 0; d < selectedDays.length; d++) {
+                    if (dayName.toUpperCase() === selectedDays[d]) {
+                        isDaySelected = true;
+                        break;
+                    }
+                }
+
+                if (!isDaySelected) {
                     continue;
                 }
 
-                ingredientText = ingredientText.split(/POSTRE:/i)[0].trim();
+                // Ahora procesar las recetas dentro de este día
+                // Formato: RECETA: ingredientes-RECETA: ingredientes-...
+                var recipePattern = /([A-Z][^:]+?):\s*([^-]+?)(?=-[A-Z]|$)/g;
+                var recipeMatch;
 
-                var basicItems = ingredientText.split(/,\s*|Y\s+/);
-                var items = [];
-                
-                for (var k = 0; k < basicItems.length; k++) {
-                    var basicItem = basicItems[k].trim();
-                    var subItems = basicItem.split(/(?<=\d)\s+(?=\d+\s+[A-Z])|(?<=[A-Z])\d+\s+(?=\d+\s+[A-Z])/);
-                    
-                    if (subItems.length === 1) {
-                        subItems = basicItem.match(/\d+\s+[A-Z][^0-9]*(?=\d+\s+[A-Z]|$)/g) || [basicItem];
+                while ((recipeMatch = recipePattern.exec(dayContent)) !== null) {
+                    var recipeName = recipeMatch[1].trim();
+                    var ingredientText = recipeMatch[2].trim();
+
+                    if (recipeName.match(/OBJETIVO|RETO|FECHA|CLIENTE|SEMANA/i)) {
+                        continue;
                     }
+
+                    // Eliminar POSTRE y todo lo que viene después
+                    ingredientText = ingredientText.split(/POSTRE:/i)[0].trim();
+
+                    // Dividir ingredientes
+                    var basicItems = ingredientText.split(/,\s*|Y\s+/);
+                    var items = [];
                     
-                    for (var m = 0; m < subItems.length; m++) {
-                        if (subItems[m].trim().length > 0) {
-                            items.push(subItems[m].trim());
+                    for (var k = 0; k < basicItems.length; k++) {
+                        var basicItem = basicItems[k].trim();
+                        if (basicItem.length > 0) {
+                            items.push(basicItem);
                         }
                     }
-                }
 
-                for (var j = 0; j < items.length; j++) {
-                    var item = items[j].trim();
-                    
-                    if (item.length > 2 && !item.match(/POSTRE/i)) {
-                        var parsed = parseIngredient(item);
+                    for (var j = 0; j < items.length; j++) {
+                        var item = items[j].trim();
                         
-                        if (parsed.nombre && parsed.nombre.length > 2) {
-                            // NORMALIZAR el nombre aquí
-                            var nombreNormalizado = normalizarNombre(parsed.nombre);
-                            var key = nombreNormalizado.toLowerCase();
+                        if (item.length > 2 && !item.match(/POSTRE/i)) {
+                            var parsed = parseIngredient(item);
                             
-                            if (!ingredientsMap[key]) {
-                                ingredientsMap[key] = {
-                                    nombre: nombreNormalizado,
-                                    cantidad: parsed.cantidad,
-                                    unidad: parsed.unidad
-                                };
-                                normalizedMap[key] = parsed.nombre; // Guardar original
-                            } else {
-                                var currentQty = parseFloat(ingredientsMap[key].cantidad) || 0;
-                                var newQty = parseFloat(parsed.cantidad) || 0;
+                            if (parsed.nombre && parsed.nombre.length > 2) {
+                                var nombreNormalizado = normalizarNombre(parsed.nombre);
+                                var key = nombreNormalizado.toLowerCase();
                                 
-                                if (ingredientsMap[key].unidad === parsed.unidad) {
-                                    ingredientsMap[key].cantidad = (currentQty + newQty).toString();
-                                }
-                                else if ((ingredientsMap[key].unidad.match(/TAZA/i) && parsed.unidad.match(/G/i)) ||
-                                         (ingredientsMap[key].unidad.match(/G/i) && parsed.unidad.match(/TAZA/i))) {
-                                    var qtyInG = currentQty;
-                                    if (ingredientsMap[key].unidad.match(/TAZA/i)) {
-                                        qtyInG = currentQty * 100;
+                                if (!ingredientsMap[key]) {
+                                    ingredientsMap[key] = {
+                                        nombre: nombreNormalizado,
+                                        cantidad: parsed.cantidad,
+                                        unidad: parsed.unidad
+                                    };
+                                    normalizedMap[key] = parsed.nombre;
+                                } else {
+                                    var currentQty = parseQuantity(ingredientsMap[key].cantidad);
+                                    var newQty = parseQuantity(parsed.cantidad);
+                                    
+                                    if (ingredientsMap[key].unidad === parsed.unidad) {
+                                        ingredientsMap[key].cantidad = formatQuantity(currentQty + newQty);
                                     }
-                                    var newQtyInG = newQty;
-                                    if (parsed.unidad.match(/TAZA/i)) {
-                                        newQtyInG = newQty * 100;
+                                    else if ((ingredientsMap[key].unidad.match(/TAZA/i) && parsed.unidad.match(/G/i)) ||
+                                             (ingredientsMap[key].unidad.match(/G/i) && parsed.unidad.match(/TAZA/i))) {
+                                        var qtyInG = parseQuantity(ingredientsMap[key].cantidad);
+                                        if (ingredientsMap[key].unidad.match(/TAZA/i)) {
+                                            qtyInG = qtyInG * 100;
+                                        }
+                                        var newQtyInG = parseQuantity(parsed.cantidad);
+                                        if (parsed.unidad.match(/TAZA/i)) {
+                                            newQtyInG = newQtyInG * 100;
+                                        }
+                                        ingredientsMap[key].cantidad = formatQuantity(qtyInG + newQtyInG);
+                                        ingredientsMap[key].unidad = 'G';
                                     }
-                                    ingredientsMap[key].cantidad = (qtyInG + newQtyInG).toString();
-                                    ingredientsMap[key].unidad = 'G';
-                                }
-                                else if ((ingredientsMap[key].unidad.match(/FILETE/i) && parsed.unidad.match(/G/i)) ||
-                                         (ingredientsMap[key].unidad.match(/G/i) && parsed.unidad.match(/FILETE/i))) {
-                                    var qtyInG2 = currentQty;
-                                    if (ingredientsMap[key].unidad.match(/FILETE/i)) {
-                                        var isGrande = ingredientsMap[key].nombre.match(/GRANDE/i);
-                                        qtyInG2 = isGrande ? currentQty * 150 : currentQty * 75;
+                                    else if ((ingredientsMap[key].unidad.match(/FILETE/i) && parsed.unidad.match(/G/i)) ||
+                                             (ingredientsMap[key].unidad.match(/G/i) && parsed.unidad.match(/FILETE/i))) {
+                                        var qtyInG2 = parseQuantity(ingredientsMap[key].cantidad);
+                                        if (ingredientsMap[key].unidad.match(/FILETE/i)) {
+                                            var isGrande = ingredientsMap[key].nombre.match(/GRANDE/i);
+                                            qtyInG2 = isGrande ? qtyInG2 * 150 : qtyInG2 * 75;
+                                        }
+                                        var newQtyInG2 = parseQuantity(parsed.cantidad);
+                                        if (parsed.unidad.match(/FILETE/i)) {
+                                            var isGrande2 = parsed.nombre.match(/GRANDE/i);
+                                            newQtyInG2 = isGrande2 ? newQtyInG2 * 150 : newQtyInG2 * 75;
+                                        }
+                                        ingredientsMap[key].cantidad = formatQuantity(qtyInG2 + newQtyInG2);
+                                        ingredientsMap[key].unidad = 'G';
                                     }
-                                    var newQtyInG2 = newQty;
-                                    if (parsed.unidad.match(/FILETE/i)) {
-                                        var isGrande2 = parsed.nombre.match(/GRANDE/i);
-                                        newQtyInG2 = isGrande2 ? newQty * 150 : newQty * 75;
-                                    }
-                                    ingredientsMap[key].cantidad = (qtyInG2 + newQtyInG2).toString();
-                                    ingredientsMap[key].unidad = 'G';
                                 }
                             }
                         }
@@ -645,19 +787,19 @@
                 var displayUnit = item.unidad;
 
                 if (item.unidad.match(/TAZA/i) && (item.nombre.match(/ARROZ/i) || item.nombre.match(/CUSCÚS/i))) {
-                    var qty = parseFloat(item.cantidad);
-                    displayQty = (qty * 100).toString();
+                    var qty = parseQuantity(item.cantidad);
+                    displayQty = formatQuantity(qty * 100);
                     displayUnit = 'G';
                 }
                 
                 if (item.unidad.match(/FILETE/i)) {
                     var fullText = (item.nombre + ' ' + item.unidad).toUpperCase();
-                    var qty = parseFloat(item.cantidad);
+                    var qty = parseQuantity(item.cantidad);
                     
                     if (fullText.match(/GRANDE/)) {
-                        displayQty = (qty * 150).toString();
+                        displayQty = formatQuantity(qty * 150);
                     } else {
-                        displayQty = (qty * 75).toString();
+                        displayQty = formatQuantity(qty * 75);
                     }
                     displayUnit = 'G';
                 }
