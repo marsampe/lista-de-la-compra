@@ -285,7 +285,7 @@
 
     function processIngredientText(text, ingredientsMap) {
         // Dividir por comas y por " Y "
-        var items = text.split(/,\s*|\bY\b\s+/i).map(s => s.trim()).filter(s => s.length > 2);
+        var items = text.split(/,\s*|\bY\b\s+|\bCON\b\s+/i).map(s => s.trim()).filter(s => s.length > 2);
 
         items.forEach(function(item) {
             // Limpiar punto final
